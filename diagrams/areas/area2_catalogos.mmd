@@ -1,0 +1,30 @@
+---
+title: "FOSOFAMILIA - DER v0.4 - Area 2 - Catalogos y articulos"
+config:
+  theme: neutral
+---
+erDiagram
+
+    ESPECIFICO ||--o{ ARTICULO : "clasifica"
+    UNIDAD_MEDIDA ||--o{ ARTICULO : "mide [P sin datos en Excel]"
+    ESPECIFICO {
+        integer id_especifico PK
+        varchar codigo UK "NOT NULL, ej. 54105"
+        varchar nombre "NOT NULL"
+        boolean activo "NOT NULL default true"
+    }
+    UNIDAD_MEDIDA {
+        smallint id_unidad_medida PK
+        varchar abreviatura UK "NOT NULL"
+        varchar nombre UK "NOT NULL"
+    }
+    ARTICULO {
+        integer id_articulo PK
+        varchar codigo UK "NOT NULL, ej. PABONDTC"
+        varchar descripcion "NOT NULL"
+        integer id_especifico FK "NOT NULL"
+        smallint id_unidad_medida FK "NOT NULL [P]"
+        numeric existencia_actual "NOT NULL, CHECK mayor o igual 0, saldo mantenido por trigger"
+        numeric costo_promedio_actual "NOT NULL, politica de recalculo POR CONFIRMAR"
+        boolean activo "NOT NULL default true"
+    }

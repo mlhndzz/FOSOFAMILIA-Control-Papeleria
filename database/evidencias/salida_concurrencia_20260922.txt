@@ -1,0 +1,88 @@
+=== Z1: dos salidas concurrentes que exceden el stock (A=100, B=100, stock 139) ===
+SET
+BEGIN
+INSERT 0 1
+INSERT 0 1
+                      a                      
+---------------------------------------------
+ A: detalle insertado, reteniendo bloqueo 4s
+(1 row)
+
+ pg_sleep 
+----------
+ 
+(1 row)
+
+COMMIT
+      a       
+--------------
+ A: COMMIT ok
+(1 row)
+
+
+SET
+ pg_sleep 
+----------
+ 
+(1 row)
+
+BEGIN
+INSERT 0 1
+        b_antes_detalle        
+-------------------------------
+ 2026-09-22 12:29:08.098185-06
+(1 row)
+
+psql:/var/lib/postgresql/sesB.sql:7: ERROR:  new row for relation "articulo" violates check constraint "articulo_existencia_actual_check"
+DETAIL:  Failing row contains (1, PRB-ART-1, PRB ARTICULO UNO, 1, 1, -61.00, 0.0000, t).
+CONTEXT:  SQL statement "UPDATE articulo SET existencia_actual = existencia_actual + v_efecto_new
+         WHERE id_articulo = NEW.id_articulo"
+PL/pgSQL function fn_movdet_actualiza_saldo() line 16 at SQL statement
+ROLLBACK
+                b                 
+----------------------------------
+ B: COMMIT ok (NO esperado en Z1)
+(1 row)
+
+=== Z2: dos salidas concurrentes que caben (A=20, B=10, stock 39) ===
+SET
+BEGIN
+INSERT 0 1
+INSERT 0 1
+                      a                      
+---------------------------------------------
+ A: detalle insertado, reteniendo bloqueo 4s
+(1 row)
+
+ pg_sleep 
+----------
+ 
+(1 row)
+
+COMMIT
+      a       
+--------------
+ A: COMMIT ok
+(1 row)
+
+
+SET
+ pg_sleep 
+----------
+ 
+(1 row)
+
+BEGIN
+INSERT 0 1
+        b_antes_detalle        
+-------------------------------
+ 2026-09-22 12:29:24.846327-06
+(1 row)
+
+INSERT 0 1
+COMMIT
+               b               
+-------------------------------
+ B: COMMIT ok (esperado en Z2)
+(1 row)
+

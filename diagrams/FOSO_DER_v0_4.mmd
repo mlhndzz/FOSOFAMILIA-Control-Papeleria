@@ -1,0 +1,148 @@
+---
+title: "FOSOFAMILIA — Sistema de Control de Papelería y Útiles — DER v0.4 (22/09/2026)"
+config:
+  theme: neutral
+---
+erDiagram
+    %% =====================================================================
+    %% DER v0.4 — MODELO CANONICO (fuente unica; los diagramas por area y el
+    %% DER general compacto del PDF se derivan de este archivo).
+    %% Convenciones:
+    %%   [P] = decision PROVISIONAL, pendiente de confirmacion institucional
+    %%         (ver matriz de decisiones pendientes).
+    %% v0.4: sin columnas redundantes de naturaleza (3FN); la coherencia
+    %% compra=entrada / requisicion=salida se valida por triggers.
+    %% Fuentes: correo institucional, diagrama de flujo JPG,
+    %%          CONTROL DE PAPELERIA Y UTILES.xlsx (7 hojas).
+    %% =====================================================================
+
+    %% ---- AREA 1: Seguridad y organizacion ----
+    ROL ||--o{ USUARIO : "tiene asignado [P un solo rol]"
+    ROL ||--o{ ROL_PERMISO : "agrupa"
+    PERMISO ||--o{ ROL_PERMISO : "concedido en"
+    UNIDAD_ORGANIZATIVA |o--o{ USUARIO : "adscribe [P]"
+
+    %% ---- AREA 2: Catalogos y articulos ----
+    ESPECIFICO ||--o{ ARTICULO : "clasifica"
+    UNIDAD_MEDIDA ||--o{ ARTICULO : "mide [P sin datos en Excel]"
+
+    %% ---- AREA 3: Requisiciones ----
+    UNIDAD_ORGANIZATIVA ||--o{ REQUISICION : "solicita"
+    USUARIO ||--o{ REQUISICION : "crea"
+    USUARIO |o--o{ REQUISICION : "revisa y aprueba"
+    REQUISICION ||--|{ REQUISICION_DETALLE : "contiene lineas"
+    ARTICULO ||--o{ REQUISICION_DETALLE : "solicitado en"
+
+    %% ---- AREA 4: Movimientos de inventario y compras ----
+    TIPO_MOVIMIENTO ||--o{ MOVIMIENTO : "tipifica (naturaleza E/S)"
+    USUARIO ||--o{ MOVIMIENTO : "registra"
+    MOVIMIENTO ||--|{ MOVIMIENTO_DETALLE : "contiene lineas"
+    ARTICULO ||--o{ MOVIMIENTO_DETALLE : "afectado en"
+    MOVIMIENTO ||--o| COMPRA : "subtipo solo si es entrada"
+    PROVEEDOR ||--o{ COMPRA : "factura [P obligatoriedad]"
+    REQUISICION |o--o| MOVIMIENTO : "despachada por [P unico provisional]"
+
+    ROL {
+        smallint id_rol PK
+        varchar nombre UK "NOT NULL"
+        varchar descripcion "NULL"
+        boolean activo "NOT NULL default true"
+    }
+    PERMISO {
+        smallint id_permiso PK
+        varchar codigo UK "NOT NULL"
+        varchar descripcion "NULL"
+    }
+    ROL_PERMISO {
+        smallint id_rol PK,FK
+        smallint id_permiso PK,FK
+    }
+    USUARIO {
+        integer id_usuario PK
+        varchar nombre_usuario UK "NOT NULL"
+        varchar nombre_completo "NOT NULL"
+        varchar correo UK "NULL, por validar"
+        varchar hash_contrasena "NOT NULL, hash con sal"
+        smallint id_rol FK "NOT NULL [P un solo rol]"
+        integer id_unidad_organizativa FK "NULL [P]"
+        boolean activo "NOT NULL default true"
+        timestamptz fecha_creacion "NOT NULL default now()"
+    }
+    UNIDAD_ORGANIZATIVA {
+        integer id_unidad_organizativa PK
+        varchar nombre UK "NOT NULL"
+        boolean activo "NOT NULL default true"
+    }
+    ESPECIFICO {
+        integer id_especifico PK
+        varchar codigo UK "NOT NULL, ej. 54105"
+        varchar nombre "NOT NULL"
+        boolean activo "NOT NULL default true"
+    }
+    UNIDAD_MEDIDA {
+        smallint id_unidad_medida PK
+        varchar abreviatura UK "NOT NULL"
+        varchar nombre UK "NOT NULL"
+    }
+    ARTICULO {
+        integer id_articulo PK
+        varchar codigo UK "NOT NULL, ej. PABONDTC"
+        varchar descripcion "NOT NULL"
+        integer id_especifico FK "NOT NULL"
+        smallint id_unidad_medida FK "NOT NULL [P]"
+        numeric existencia_actual "NOT NULL, CHECK mayor o igual 0, saldo mantenido por trigger"
+        numeric costo_promedio_actual "NOT NULL, politica de recalculo POR CONFIRMAR"
+        boolean activo "NOT NULL default true"
+    }
+    PROVEEDOR {
+        integer id_proveedor PK
+        varchar nombre UK "NOT NULL"
+        varchar registro_fiscal "NULL, campos POR CONFIRMAR"
+        boolean activo "NOT NULL default true"
+    }
+    TIPO_MOVIMIENTO {
+        smallint id_tipo_movimiento PK
+        varchar codigo UK "NOT NULL, SM y S5 observados sin confirmar"
+        varchar nombre "NOT NULL"
+        char naturaleza "NOT NULL, CHECK E o S; inmutable si el tipo esta en uso (trigger)"
+    }
+    MOVIMIENTO {
+        bigint id_movimiento PK
+        smallint id_tipo_movimiento FK "NOT NULL"
+        varchar numero_comprobante "NOT NULL, UK con tipo [P alcance correlativo]"
+        date fecha "NOT NULL"
+        integer id_usuario_registra FK "NOT NULL"
+        integer id_requisicion FK "NULL, solo salidas (validado por trigger); UK parcial [P despacho unico]"
+        varchar observacion "NULL"
+        timestamptz fecha_registro "NOT NULL default now()"
+    }
+    MOVIMIENTO_DETALLE {
+        bigint id_movimiento PK,FK
+        smallint numero_linea PK "CHECK mayor que 0"
+        integer id_articulo FK "NOT NULL"
+        numeric cantidad "NOT NULL, CHECK mayor que 0"
+        numeric costo_unitario "NOT NULL, costo historico congelado"
+    }
+    COMPRA {
+        bigint id_movimiento PK,FK "subtipo 1 a 1, solo entradas (validado por trigger)"
+        integer id_proveedor FK "NOT NULL [P columna vacia en Excel]"
+        varchar numero_factura "NOT NULL, UK con proveedor; GUID observados sin interpretar"
+    }
+    REQUISICION {
+        integer id_requisicion PK
+        varchar numero UK "NOT NULL"
+        integer id_unidad_organizativa FK "NOT NULL"
+        integer id_usuario_solicita FK "NOT NULL"
+        date fecha_solicitud "NOT NULL"
+        varchar estado "NOT NULL, lista POR CONFIRMAR, CHECK diferido"
+        integer id_usuario_revisa FK "NULL hasta revision"
+        timestamptz fecha_revision "NULL"
+        varchar observacion "NULL"
+    }
+    REQUISICION_DETALLE {
+        integer id_requisicion PK,FK
+        smallint numero_linea PK "CHECK mayor que 0"
+        integer id_articulo FK "NOT NULL"
+        numeric cantidad_solicitada "NOT NULL, CHECK mayor que 0"
+        numeric cantidad_aprobada "NULL [P aprobacion parcial POR CONFIRMAR]"
+    }

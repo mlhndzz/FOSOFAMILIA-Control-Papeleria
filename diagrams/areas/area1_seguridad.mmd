@@ -1,0 +1,42 @@
+---
+title: "FOSOFAMILIA - DER v0.4 - Area 1 - Seguridad y organizacion"
+config:
+  theme: neutral
+---
+erDiagram
+
+    ROL ||--o{ USUARIO : "tiene asignado [P un solo rol]"
+    ROL ||--o{ ROL_PERMISO : "agrupa"
+    PERMISO ||--o{ ROL_PERMISO : "concedido en"
+    UNIDAD_ORGANIZATIVA |o--o{ USUARIO : "adscribe [P]"
+    ROL {
+        smallint id_rol PK
+        varchar nombre UK "NOT NULL"
+        varchar descripcion "NULL"
+        boolean activo "NOT NULL default true"
+    }
+    PERMISO {
+        smallint id_permiso PK
+        varchar codigo UK "NOT NULL"
+        varchar descripcion "NULL"
+    }
+    ROL_PERMISO {
+        smallint id_rol PK,FK
+        smallint id_permiso PK,FK
+    }
+    USUARIO {
+        integer id_usuario PK
+        varchar nombre_usuario UK "NOT NULL"
+        varchar nombre_completo "NOT NULL"
+        varchar correo UK "NULL, por validar"
+        varchar hash_contrasena "NOT NULL, hash con sal"
+        smallint id_rol FK "NOT NULL [P un solo rol]"
+        integer id_unidad_organizativa FK "NULL [P]"
+        boolean activo "NOT NULL default true"
+        timestamptz fecha_creacion "NOT NULL default now()"
+    }
+    UNIDAD_ORGANIZATIVA {
+        integer id_unidad_organizativa PK
+        varchar nombre UK "NOT NULL"
+        boolean activo "NOT NULL default true"
+    }

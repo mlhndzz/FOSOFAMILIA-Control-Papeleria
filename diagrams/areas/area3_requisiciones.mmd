@@ -1,0 +1,42 @@
+---
+title: "FOSOFAMILIA - DER v0.4 - Area 3 - Requisiciones"
+config:
+  theme: neutral
+---
+erDiagram
+
+    UNIDAD_ORGANIZATIVA |o--o{ USUARIO : "adscribe [P]"
+    UNIDAD_ORGANIZATIVA ||--o{ REQUISICION : "solicita"
+    USUARIO ||--o{ REQUISICION : "crea"
+    USUARIO |o--o{ REQUISICION : "revisa y aprueba"
+    REQUISICION ||--|{ REQUISICION_DETALLE : "contiene lineas"
+    ARTICULO ||--o{ REQUISICION_DETALLE : "solicitado en"
+    USUARIO {
+        integer id_usuario PK "ver area correspondiente"
+    }
+    UNIDAD_ORGANIZATIVA {
+        integer id_unidad_organizativa PK
+        varchar nombre UK "NOT NULL"
+        boolean activo "NOT NULL default true"
+    }
+    ARTICULO {
+        integer id_articulo PK "ver area correspondiente"
+    }
+    REQUISICION {
+        integer id_requisicion PK
+        varchar numero UK "NOT NULL"
+        integer id_unidad_organizativa FK "NOT NULL"
+        integer id_usuario_solicita FK "NOT NULL"
+        date fecha_solicitud "NOT NULL"
+        varchar estado "NOT NULL, lista POR CONFIRMAR, CHECK diferido"
+        integer id_usuario_revisa FK "NULL hasta revision"
+        timestamptz fecha_revision "NULL"
+        varchar observacion "NULL"
+    }
+    REQUISICION_DETALLE {
+        integer id_requisicion PK,FK
+        smallint numero_linea PK "CHECK mayor que 0"
+        integer id_articulo FK "NOT NULL"
+        numeric cantidad_solicitada "NOT NULL, CHECK mayor que 0"
+        numeric cantidad_aprobada "NULL [P aprobacion parcial POR CONFIRMAR]"
+    }

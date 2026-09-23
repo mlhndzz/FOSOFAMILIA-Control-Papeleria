@@ -1,0 +1,59 @@
+---
+title: "FOSOFAMILIA - DER v0.4 - Area 4 - Movimientos de inventario y compras"
+config:
+  theme: neutral
+---
+erDiagram
+
+    USUARIO ||--o{ REQUISICION : "crea"
+    USUARIO |o--o{ REQUISICION : "revisa y aprueba"
+    TIPO_MOVIMIENTO ||--o{ MOVIMIENTO : "tipifica (naturaleza E/S)"
+    USUARIO ||--o{ MOVIMIENTO : "registra"
+    MOVIMIENTO ||--|{ MOVIMIENTO_DETALLE : "contiene lineas"
+    ARTICULO ||--o{ MOVIMIENTO_DETALLE : "afectado en"
+    MOVIMIENTO ||--o| COMPRA : "subtipo solo si es entrada"
+    PROVEEDOR ||--o{ COMPRA : "factura [P obligatoriedad]"
+    REQUISICION |o--o| MOVIMIENTO : "despachada por [P unico provisional]"
+    USUARIO {
+        integer id_usuario PK "ver area correspondiente"
+    }
+    ARTICULO {
+        integer id_articulo PK "ver area correspondiente"
+    }
+    PROVEEDOR {
+        integer id_proveedor PK
+        varchar nombre UK "NOT NULL"
+        varchar registro_fiscal "NULL, campos POR CONFIRMAR"
+        boolean activo "NOT NULL default true"
+    }
+    TIPO_MOVIMIENTO {
+        smallint id_tipo_movimiento PK
+        varchar codigo UK "NOT NULL, SM y S5 observados sin confirmar"
+        varchar nombre "NOT NULL"
+        char naturaleza "NOT NULL, CHECK E o S; inmutable si el tipo esta en uso (trigger)"
+    }
+    MOVIMIENTO {
+        bigint id_movimiento PK
+        smallint id_tipo_movimiento FK "NOT NULL"
+        varchar numero_comprobante "NOT NULL, UK con tipo [P alcance correlativo]"
+        date fecha "NOT NULL"
+        integer id_usuario_registra FK "NOT NULL"
+        integer id_requisicion FK "NULL, solo salidas (validado por trigger); UK parcial [P despacho unico]"
+        varchar observacion "NULL"
+        timestamptz fecha_registro "NOT NULL default now()"
+    }
+    MOVIMIENTO_DETALLE {
+        bigint id_movimiento PK,FK
+        smallint numero_linea PK "CHECK mayor que 0"
+        integer id_articulo FK "NOT NULL"
+        numeric cantidad "NOT NULL, CHECK mayor que 0"
+        numeric costo_unitario "NOT NULL, costo historico congelado"
+    }
+    COMPRA {
+        bigint id_movimiento PK,FK "subtipo 1 a 1, solo entradas (validado por trigger)"
+        integer id_proveedor FK "NOT NULL [P columna vacia en Excel]"
+        varchar numero_factura "NOT NULL, UK con proveedor; GUID observados sin interpretar"
+    }
+    REQUISICION {
+        integer id_requisicion PK "ver area correspondiente"
+    }

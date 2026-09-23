@@ -1,0 +1,129 @@
+---
+title: "FOSOFAMILIA - DER v0.4 - Vista general (atributos comentados en las vistas por area)"
+config:
+  theme: neutral
+---
+erDiagram
+
+    ROL ||--o{ USUARIO : "tiene asignado [P un solo rol]"
+    ROL ||--o{ ROL_PERMISO : "agrupa"
+    PERMISO ||--o{ ROL_PERMISO : "concedido en"
+    UNIDAD_ORGANIZATIVA |o--o{ USUARIO : "adscribe [P]"
+    ESPECIFICO ||--o{ ARTICULO : "clasifica"
+    UNIDAD_MEDIDA ||--o{ ARTICULO : "mide [P sin datos en Excel]"
+    UNIDAD_ORGANIZATIVA ||--o{ REQUISICION : "solicita"
+    USUARIO ||--o{ REQUISICION : "crea"
+    USUARIO |o--o{ REQUISICION : "revisa y aprueba"
+    REQUISICION ||--|{ REQUISICION_DETALLE : "contiene lineas"
+    ARTICULO ||--o{ REQUISICION_DETALLE : "solicitado en"
+    TIPO_MOVIMIENTO ||--o{ MOVIMIENTO : "tipifica (naturaleza E/S)"
+    USUARIO ||--o{ MOVIMIENTO : "registra"
+    MOVIMIENTO ||--|{ MOVIMIENTO_DETALLE : "contiene lineas"
+    ARTICULO ||--o{ MOVIMIENTO_DETALLE : "afectado en"
+    MOVIMIENTO ||--o| COMPRA : "subtipo solo si es entrada"
+    PROVEEDOR ||--o{ COMPRA : "factura [P obligatoriedad]"
+    REQUISICION |o--o| MOVIMIENTO : "despachada por [P unico provisional]"
+    ROL {
+        smallint id_rol PK
+        varchar nombre UK
+        varchar descripcion
+        boolean activo
+    }
+    PERMISO {
+        smallint id_permiso PK
+        varchar codigo UK
+        varchar descripcion
+    }
+    ROL_PERMISO {
+        smallint id_rol PK,FK
+        smallint id_permiso PK,FK
+    }
+    USUARIO {
+        integer id_usuario PK
+        varchar nombre_usuario UK
+        varchar nombre_completo
+        varchar correo UK
+        varchar hash_contrasena
+        smallint id_rol FK "[P]"
+        integer id_unidad_organizativa FK "[P]"
+        boolean activo
+        timestamptz fecha_creacion
+    }
+    UNIDAD_ORGANIZATIVA {
+        integer id_unidad_organizativa PK
+        varchar nombre UK
+        boolean activo
+    }
+    ESPECIFICO {
+        integer id_especifico PK
+        varchar codigo UK
+        varchar nombre
+        boolean activo
+    }
+    UNIDAD_MEDIDA {
+        smallint id_unidad_medida PK
+        varchar abreviatura UK
+        varchar nombre UK
+    }
+    ARTICULO {
+        integer id_articulo PK
+        varchar codigo UK
+        varchar descripcion
+        integer id_especifico FK
+        smallint id_unidad_medida FK "[P]"
+        numeric existencia_actual
+        numeric costo_promedio_actual
+        boolean activo
+    }
+    PROVEEDOR {
+        integer id_proveedor PK
+        varchar nombre UK
+        varchar registro_fiscal
+        boolean activo
+    }
+    TIPO_MOVIMIENTO {
+        smallint id_tipo_movimiento PK
+        varchar codigo UK
+        varchar nombre
+        char naturaleza
+    }
+    MOVIMIENTO {
+        bigint id_movimiento PK
+        smallint id_tipo_movimiento FK
+        varchar numero_comprobante "[P]"
+        date fecha
+        integer id_usuario_registra FK
+        integer id_requisicion FK "[P]"
+        varchar observacion
+        timestamptz fecha_registro
+    }
+    MOVIMIENTO_DETALLE {
+        bigint id_movimiento PK,FK
+        smallint numero_linea PK
+        integer id_articulo FK
+        numeric cantidad
+        numeric costo_unitario
+    }
+    COMPRA {
+        bigint id_movimiento PK,FK
+        integer id_proveedor FK "[P]"
+        varchar numero_factura
+    }
+    REQUISICION {
+        integer id_requisicion PK
+        varchar numero UK
+        integer id_unidad_organizativa FK
+        integer id_usuario_solicita FK
+        date fecha_solicitud
+        varchar estado
+        integer id_usuario_revisa FK
+        timestamptz fecha_revision
+        varchar observacion
+    }
+    REQUISICION_DETALLE {
+        integer id_requisicion PK,FK
+        smallint numero_linea PK
+        integer id_articulo FK
+        numeric cantidad_solicitada
+        numeric cantidad_aprobada "[P]"
+    }

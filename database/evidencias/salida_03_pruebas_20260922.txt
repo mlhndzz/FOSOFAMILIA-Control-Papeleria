@@ -1,0 +1,293 @@
+SET
+psql:/var/lib/postgresql/03_pruebas.sql:29: NOTICE:  table "_prb_resultados" does not exist, skipping
+DROP TABLE
+CREATE TABLE
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 3
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+psql:/var/lib/postgresql/03_pruebas.sql:100: NOTICE:  table "_prb_ids" does not exist, skipping
+DROP TABLE
+SELECT 1
+DO
+ _prb_espera_valor 
+-------------------
+ 
+(1 row)
+
+ _prb_espera_valor 
+-------------------
+ 
+(1 row)
+
+ _prb_espera_valor 
+-------------------
+ 
+(1 row)
+
+ _prb_espera_error 
+-------------------
+ 
+(1 row)
+
+ _prb_espera_error 
+-------------------
+ 
+(1 row)
+
+ _prb_espera_error 
+-------------------
+ 
+(1 row)
+
+ _prb_espera_error 
+-------------------
+ 
+(1 row)
+
+ _prb_espera_error 
+-------------------
+ 
+(1 row)
+
+ _prb_espera_ok 
+----------------
+ 
+(1 row)
+
+ _prb_espera_error 
+-------------------
+ 
+(1 row)
+
+ _prb_espera_error 
+-------------------
+ 
+(1 row)
+
+ _prb_espera_ok 
+----------------
+ 
+(1 row)
+
+ _prb_espera_error 
+-------------------
+ 
+(1 row)
+
+ _prb_espera_error 
+-------------------
+ 
+(1 row)
+
+DO
+ _prb_espera_error 
+-------------------
+ 
+(1 row)
+
+ _prb_espera_ok 
+----------------
+ 
+(1 row)
+
+ _prb_espera_valor 
+-------------------
+ 
+(1 row)
+
+ _prb_espera_error 
+-------------------
+ 
+(1 row)
+
+ _prb_espera_error 
+-------------------
+ 
+(1 row)
+
+ _prb_espera_error 
+-------------------
+ 
+(1 row)
+
+ _prb_espera_ok 
+----------------
+ 
+(1 row)
+
+ _prb_espera_valor 
+-------------------
+ 
+(1 row)
+
+ _prb_espera_ok 
+----------------
+ 
+(1 row)
+
+ _prb_espera_valor 
+-------------------
+ 
+(1 row)
+
+ _prb_espera_ok 
+----------------
+ 
+(1 row)
+
+ _prb_espera_valor 
+-------------------
+ 
+(1 row)
+
+ _prb_espera_error 
+-------------------
+ 
+(1 row)
+
+ _prb_espera_valor 
+-------------------
+ 
+(1 row)
+
+ _prb_espera_ok 
+----------------
+ 
+(1 row)
+
+ _prb_espera_valor 
+-------------------
+ 
+(1 row)
+
+ _prb_espera_error 
+-------------------
+ 
+(1 row)
+
+ _prb_espera_valor 
+-------------------
+ 
+(1 row)
+
+ _prb_espera_error 
+-------------------
+ 
+(1 row)
+
+ _prb_espera_ok 
+----------------
+ 
+(1 row)
+
+ _prb_espera_error 
+-------------------
+ 
+(1 row)
+
+ _prb_espera_error 
+-------------------
+ 
+(1 row)
+
+ _prb_espera_ok 
+----------------
+ 
+(1 row)
+
+BEGIN
+INSERT 0 1
+INSERT 0 1
+ROLLBACK
+ _prb_espera_valor 
+-------------------
+ 
+(1 row)
+
+ _prb_espera_valor 
+-------------------
+ 
+(1 row)
+
+ _prb_espera_valor 
+-------------------
+ 
+(1 row)
+
+ _prb_espera_valor 
+-------------------
+ 
+(1 row)
+
+ _prb_espera_valor 
+-------------------
+ 
+(1 row)
+
+ _prb_espera_valor 
+-------------------
+ 
+(1 row)
+
+ seccion |                                         prueba                                         |                  esperado                  |                                                         obtenido                                                         | estado 
+---------+----------------------------------------------------------------------------------------+--------------------------------------------+--------------------------------------------------------------------------------------------------------------------------+--------
+ B       | B1 saldo tras entrada 100+50 (dos lineas, mismo articulo)                              | 150                                        | 150.00                                                                                                                   | PASS
+ B       | B2 conciliacion en cero tras entrada                                                   | 0                                          | 0.00                                                                                                                     | PASS
+ B       | B3 compra visible en vw_reporte_compras (2 lineas)                                     | 2                                          | 2                                                                                                                        | PASS
+ C       | C1 compra sobre movimiento de salida                                                   | ERROR con «movimiento de entrada»          | Una compra solo puede asociarse a un movimiento de entrada (movimiento 5)                                                | PASS
+ C       | C2 misma factura del mismo proveedor en OTRA entrada                                   | ERROR con «ux_compra_factura»              | duplicate key value violates unique constraint "ux_compra_factura"                                                       | PASS
+ C       | C3 segunda fila de compra para el mismo movimiento                                     | ERROR con «compra_pkey»                    | duplicate key value violates unique constraint "compra_pkey"                                                             | PASS
+ C       | C4 requisicion vinculada a un tipo de entrada                                          | ERROR con «entrada no puede vincularse»    | Un movimiento de entrada no puede vincularse a una requisición (movimiento tipo 1, requisición 1)                        | PASS
+ C       | C5 cambiar naturaleza de un tipo en uso                                                | ERROR con «no puede cambiar»               | El tipo de movimiento PRB-E ya tiene movimientos registrados: su naturaleza no puede cambiar                             | PASS
+ C       | C6 cambiar naturaleza de un tipo SIN uso                                               | ejecuta sin error                          | sin error                                                                                                                | PASS
+ C       | C7 cambiar tipo de un movimiento con lineas/compra                                     | ERROR con «no se permite cambiar»          | El movimiento 1 ya tiene líneas o compra asociada: no se permite cambiar su tipo o requisición                           | PASS
+ C       | C8 comprobante duplicado en el mismo tipo                                              | ERROR con «ux_movimiento_comprobante»      | duplicate key value violates unique constraint "ux_movimiento_comprobante"                                               | PASS
+ C       | C9 mismo numero de comprobante en OTRO tipo (correlativo por tipo [P])                 | ejecuta sin error                          | sin error                                                                                                                | PASS
+ C       | C10 cantidad negativa en detalle                                                       | ERROR con «cantidad»                       | new row for relation "movimiento_detalle" violates check constraint "movimiento_detalle_cantidad_check"                  | PASS
+ C       | C11 codigo de articulo con espacios de borde                                           | ERROR con «ck_articulo_codigo_formato»     | new row for relation "articulo" violates check constraint "ck_articulo_codigo_formato"                                   | PASS
+ D       | D1 despachar articulo no incluido en la requisicion                                    | ERROR con «no está en la requisición»      | Despacho rechazado: el artículo 2 no está en la requisición 2 (o su cantidad autorizada es 0)                            | PASS
+ D       | D2 despacho valido de 10 (autorizado 20, stock 150)                                    | ejecuta sin error                          | sin error                                                                                                                | PASS
+ D       | D3 saldo tras despacho                                                                 | 140                                        | 140.00                                                                                                                   | PASS
+ D       | D4 linea adicional que excede lo autorizado (10+15>20)                                 | ERROR con «excede lo autorizado»           | Despacho rechazado: artículo 1, despachado acumulado 25.00 excede lo autorizado 20.00 en la requisición 2                | PASS
+ D       | D5 [P] segundo despacho de la misma requisicion (despacho unico provisional)           | ERROR con «ux_movimiento_despacho_unico»   | duplicate key value violates unique constraint "ux_movimiento_despacho_unico"                                            | PASS
+ D       | D6 salida libre mayor que el stock                                                     | ERROR con «existencia_actual_check»        | new row for relation "articulo" violates check constraint "articulo_existencia_actual_check"                             | PASS
+ D       | D7 salida por obsolescencia via catalogo de tipos (naturaleza S)                       | ejecuta sin error                          | sin error                                                                                                                | PASS
+ D       | D8 saldo tras obsolescencia de 5                                                       | 135                                        | 135.00                                                                                                                   | PASS
+ E       | E1 correccion de la entrada 100->99 con salidas ya registradas (delta neto)            | ejecuta sin error                          | sin error                                                                                                                | PASS
+ E       | E2 saldo tras correccion (135-1)                                                       | 134                                        | 134.00                                                                                                                   | PASS
+ E       | E3a escenario auditoria: corregir entrada de art3 de 10 a 9 (saldo 2, salida 8)        | ejecuta sin error                          | sin error                                                                                                                | PASS
+ E       | E3b saldo final del escenario = 1 (delta neto, sin negativo transitorio)               | 1                                          | 1.00                                                                                                                     | PASS
+ E       | E3c correccion que SI dejaria saldo negativo (9 a 7)                                   | ERROR con «existencia_actual_check»        | new row for relation "articulo" violates check constraint "articulo_existencia_actual_check"                             | PASS
+ E       | E3d el rechazo no altero el saldo de art3                                              | 1                                          | 1.00                                                                                                                     | PASS
+ E       | E4 borrar una LINEA de la obsolescencia (revierte 5)                                   | ejecuta sin error                          | sin error                                                                                                                | PASS
+ E       | E5 saldo tras revertir la linea                                                        | 139                                        | 139.00                                                                                                                   | PASS
+ E       | E6 borrar el ENCABEZADO de la entrada con stock ya consumido                           | ERROR con «existencia_actual_check»        | new row for relation "articulo" violates check constraint "articulo_existencia_actual_check"                             | PASS
+ E       | E7 el rechazo no dejo efectos residuales                                               | 139                                        | 139.00                                                                                                                   | PASS
+ F       | F1 reducir cantidad_aprobada por debajo de lo despachado                               | ERROR con «quedaría en»                    | Cambio rechazado: la requisición 2 ya tiene 10.00 despachado del artículo 1 y la autorización quedaría en 9.00           | PASS
+ F       | F2 reducir dentro del margen (12->4; autorizado 4+8=12 >= 10)                          | ejecuta sin error                          | sin error                                                                                                                | PASS
+ F       | F3 borrar la otra linea del articulo despachado                                        | ERROR con «quedaría en»                    | Cambio rechazado: la requisición 2 ya tiene 10.00 despachado del artículo 1 y la autorización quedaría en 4.00           | PASS
+ F       | F4 borrar la requisicion con despacho registrado                                       | ERROR con «movimiento_id_requisicion_fkey» | update or delete on table "requisicion" violates foreign key constraint "movimiento_id_requisicion_fkey" on table "movim | PASS
+ F       | F5 una requisicion sin despachos si se borra (cascada de lineas)                       | ejecuta sin error                          | sin error                                                                                                                | PASS
+ G       | G1 ROLLBACK revierte encabezado, detalle y saldo                                       | 139                                        | 139.00                                                                                                                   | PASS
+ G       | G2 el movimiento revertido no existe                                                   | 0                                          | 0                                                                                                                        | PASS
+ H       | H1 conciliacion global: ningun articulo con diferencia                                 | 0                                          | 0                                                                                                                        | PASS
+ H       | H2 vw_reporte_inventario valora stock al costo vigente (139 x 0 = 0 aqui)              | 0                                          | 0.00                                                                                                                     | PASS
+ H       | H3 vw_reporte_salidas suma las salidas registradas (10 desp + 0 obsolescencia tras E4) | 10                                         | 10.00                                                                                                                    | PASS
+ H       | H4 vw_reporte_requisiciones muestra despachado por articulo                            | 10                                         | 10.00                                                                                                                    | PASS
+(43 rows)
+
+ pass | fail | total 
+------+------+-------
+   43 |    0 |    43
+(1 row)
+

@@ -1,0 +1,45 @@
+# .NET / Visual Studio
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# VS Code
+.vscode/
+
+# Variables y secretos
+.env
+.env.*
+!.env.example
+appsettings.Development.json
+secrets.json
+
+# PostgreSQL / backups
+*.backup
+*.dump
+*.sql.bak
+pgdata/
+
+# Logs y temporales
+*.log
+*.tmp
+*.temp
+~$*
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Node (si se usa JS en frontend)
+node_modules/
+
+# Archivos institucionales fuente NO autorizados para repositorio
+CONTROL DE PAPELERIA Y UTILES.xlsx
+*.m4a

@@ -1,0 +1,9 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>ad134987-44f5-434e-bb3a-a5b967f4023d</UserSecretsId>
+  </PropertyGroup>
+  <ItemGroup><PackageReference Include="Npgsql" Version="8.0.6" /></ItemGroup>
+</Project>
